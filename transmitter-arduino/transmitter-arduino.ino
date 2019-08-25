@@ -35,40 +35,30 @@
 
 #include <SPI.h>
 #include <MFRC522.h>
-
 #include <VirtualWire.h>
 
 #define RST_PIN         9          // Configurable, see typical pin layout above
 #define SS_PIN          10         // Configurable, see typical pin layout above
 
-
-//const int led_pin = 11;
 const int transmit_pin = 7;
 const int receive_pin = 2;
 const int transmit_en_pin = 3;
 
-
-byte count = 1;
-
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 
 void setup() {
-
-       // Initialise the IO and ISR
+    // Initialise the IO and ISR
     vw_set_tx_pin(transmit_pin);
     vw_set_rx_pin(receive_pin);
-   vw_set_ptt_pin(transmit_en_pin);
-   vw_set_ptt_inverted(true); // Required for DR3100
+	vw_set_ptt_pin(transmit_en_pin);
+	vw_set_ptt_inverted(true); // Required for DR3100
     vw_setup(2000);       // Bits per sec
- //   pinMode(led_pin, OUTPUT);
-
  
 	Serial.begin(9600);		// Initialize serial communications with the PC
 	while (!Serial);		// Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
 	SPI.begin();			// Init SPI bus
 	mfrc522.PCD_Init();		// Init MFRC522
 	mfrc522.PCD_DumpVersionToSerial();	// Show details of PCD - MFRC522 Card Reader details
-	Serial.println(F("Scan PICC to see UID, SAK, type, and data blocks..."));
 }
 
 
@@ -83,32 +73,18 @@ void loop() {
 		return;
 	}
 
-	// Dump debug info about the card; PICC_HaltA() is automatically called
-	//mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
-
-
-
     Serial.print(F("Card UID:"));
-  for (byte i = 0; i < mfrc522.uid.size; i++) {
-    if(mfrc522.uid.uidByte[i] < 0x10)
-      Serial.print(F(" 0"));
-    else
-      Serial.print(F(" "));
-    Serial.print(mfrc522.uid.uidByte[i], HEX);
-  } 
-  Serial.println();
+	for (byte i = 0; i < mfrc522.uid.size; i++) {
+		if (mfrc522.uid.uidByte[i] < 0x10)
+			Serial.print(F(" 0"));
+		else
+			Serial.print(F(" "));
+		Serial.print(mfrc522.uid.uidByte[i], HEX);
+	} 
+	Serial.println();
 
-
-
-  //char msg[7] = {'h','e','l','l','o',' ','#'};
-
-  //msg[6] = count;
-  //digitalWrite(led_pin, HIGH); // Flash a light to show transmitting
-  //vw_send((uint8_t *)msg, 7);
-  vw_send((uint8_t *)mfrc522.uid.uidByte, mfrc522.uid.size);
-  vw_wait_tx(); // Wait until the whole message is gone
-  //digitalWrite(led_pin, LOW);
-  delay(1000);
-  count = count + 1;
-  
+	// Transmit the UID
+	vw_send((uint8_t *)mfrc522.uid.uidByte, mfrc522.uid.size);
+	vw_wait_tx(); // Wait until the whole message is gone
+	delay(1000);
 }

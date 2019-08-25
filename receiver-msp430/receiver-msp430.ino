@@ -27,7 +27,6 @@ void setup()
   lcd.backlight();
   lcd.print("Waiting for tag!");
   lcd.setCursor(0,1);
-  
 }
 
 void loop()
